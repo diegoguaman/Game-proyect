@@ -9,6 +9,4 @@ window.addEventListener('load', () => {
         startContainer.remove();
         game.start();
     })
-       
-    
 });

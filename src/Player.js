@@ -44,8 +44,14 @@ class Player {
       "./assets/img/sprite1.png",
       "./assets/img/sprite2.png",
       "./assets/img/sprite3.png",
-      "./assets/img/sprite4.png"
-    ]
+      "./assets/img/sprite4.png",
+    ];
+    this.spriteImagesLeft = [
+      "./assets/img/sprite1-left.png",
+      "./assets/img/sprite2-left.png",
+      "./assets/img/sprite3-left.png",
+      "./assets/img/sprite4-left.png",
+    ];
     this.tickFrame = 0;
     this.currentFrame = 0;
 
@@ -53,33 +59,43 @@ class Player {
     this.element.style.position = "absolute";
     this.setListener();
   }
-  drawBack(){
-    
+  start() {
+    this.intervalId = setInterval(() => {
+      this.tickFrame++;
+      if (this.tickFrame % 25 === 0) {
+        this.currentFrame = (this.currentFrame + 1) % this.spriteImages.length;
+        this.currentFrame =
+          (this.currentFrame + 1) % this.spriteImagesLeft.length;
+      }
+    }, 10);
+  }
+  stop() {
+    clearInterval(this.intervalId);
   }
   draw() {
     this.element.style.width = this.width + "px";
     this.element.style.height = this.height + "px";
     this.element.style.bottom = this.y + "px";
     this.element.style.left = this.x + "px";
-    /*setInterval(() => {
-      this.tickFrame++;
-      if (this.tickFrame % 900 === 0) {
-        this.currentFrame = (this.currentFrame + 1) % this.spriteImages.length;   
-      }
-    }, 10);*/
-    
+
     if (this.imageMotionShoot && this.shootRight) {
-      this.element.style.backgroundImage = `url('./assets/img/shoot-right.png')`;  
-    } else if (this.imageMotionShootLeft && this.shootLeft) {
-      this.element.style.backgroundImage = `url('./assets/img/shoot-left.png')`;  
+      this.element.style.backgroundImage = `url('./assets/img/shoot-right.png')`;
+    } else if (this.shootLeft) {
+      this.element.style.backgroundImage = `url('./assets/img/shoot-left.png')`;
+      //this.element.style.backgroundImage = `url('${this.spriteImagesLeft[this.currentFrame]}')`;
     } else if (this.imageMotionShootUp && this.shootUp) {
       this.element.style.backgroundImage = `url('./assets/img/shoot-up.png')`;
+    } else if (this.imageMotionShootLeft) {
+      this.element.style.backgroundImage = `url('${
+        this.spriteImagesLeft[this.currentFrame]
+      }')`;
+    } else {
+      this.element.style.backgroundImage = `url('${
+        this.spriteImages[this.currentFrame]
+      }')`;
+      //this.element.style.backgroundImage = `url('./assets/img/shoot-right.png')`;
     }
-    else{
-      //this.element.style.backgroundImage = `url('${this.spriteImages[this.currentFrame]}')`;
-      this.element.style.backgroundImage = `url('./assets/img/shoot-right.png')`; 
-    }
-    
+
     this.element.style.backgroundPosition = "center";
     this.element.style.backgroundSize = "cover";
 
@@ -138,7 +154,7 @@ class Player {
       this.vxBullet = 0;
       this.vyBullet = 15;
       this.borderBullet = "4px 4px 0 0";
-    } else{
+    } else {
       this.xBullet = this.x + this.width;
       this.yBullet = this.y + this.height / 1.55;
       this.vxBullet = 15;
@@ -155,16 +171,17 @@ class Player {
           this.yBullet,
           this.borderBullet,
           this.vxBullet,
-          this.vyBullet
+          this.vyBullet,
+          "#E85259"
         )
       );
       this.shootCoolDown = true;
       setTimeout(() => {
         this.shootCoolDown = false;
-      }, 150);
+      }, 160);
     }
   }
-  
+
   cleanup() {
     this.bullets.forEach((bullet) => {
       const inBoard = bullet.x + bullet.width < this.windowGame.offsetWidth;
@@ -183,7 +200,6 @@ class Player {
 
   setListener() {
     window.addEventListener("keydown", (e) => {
-      //console.log(e);
       switch (e.code) {
         case "KeyD":
           if (!this.playerCanCollideX) {
@@ -195,15 +211,15 @@ class Player {
           this.imageMotionShootLeft = false;
 
           break;
-        case "KeyA": 
+        case "KeyA":
           this.vx = -10;
           this.shootRight = false;
-          this.shootLeft = true;
+
           this.imageMotionShootLeft = true;
           break;
 
-        //saltar
         case "Space":
+          e.preventDefault();
           if (!this.isJumping) {
             this.y = this.floor + 25;
             this.isJumping = true;
@@ -211,29 +227,29 @@ class Player {
           }
           this.playerCanCollide = true;
           break;
-
-        case "KeyJ":
-          //this.imageMotionShoot = true;
-          this.shoot();
-          break;
         case "KeyW":
           this.shootLeft = false;
           this.shootRight = false;
           this.imageMotionShootUp = true;
           this.shootUp = true;
           break;
+
+        case "KeyJ":
+          if (!this.shootLeft && !this.shootRight && !this.shootUp) {
+            this.shootLeft = true;
+          }
+          setTimeout(() => {
+            this.shootLeft = false;
+          }, 100);
+
+          this.imageMotionShoot = true;
+          this.shoot();
+          break;
+
         case "KeyS":
           this.height = this.height / 2;
           this.playerCanCollide = false;
           this.floor = this.floorFixedY;
-          /*setTimeout(() => {
-            this.playerCanCollide = true;
-          }, 100);*/
-          /*if (this.playerCanCollide) {
-            this.playerCanCollide = false;
-          }else{
-            this.playerCanCollide = true;
-          }*/
           break;
       }
     });
@@ -242,7 +258,6 @@ class Player {
         case "KeyD":
         case "KeyA":
           this.vx = 0;
-
           break;
         case "KeyJ":
           this.imageMotionShoot = false;

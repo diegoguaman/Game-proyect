@@ -1,10 +1,10 @@
 class Bullet {
-    constructor(windowGame, width, height, x, y, borderBullet, vx, vy = 0){
+    constructor(windowGame, width, height, x, y, borderBullet, vx, vy = 0, color){
         this.windowGame = windowGame;
         this.width = width;
         this.height = height;
         this.borderBullet = borderBullet;
-        this.color = "lightblue";
+        this.color = color;
 
         this.x = x;
         this.y = y;

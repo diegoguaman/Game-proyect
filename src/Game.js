@@ -7,26 +7,38 @@ class Game {
     this.platforms = [
       new Platform(this.windowGame, this.background.width, 30, 0, 80),
     ];
-    /*this.platformsStatic = [
+    this.platformsStatic = [
       new Platform(this.windowGame, 200, 100, 600, 110, "black"),
-    ];*/
+    ];
     this.enemies = [
-      new Enemy(this.windowGame, 500, 104),
-      new Enemy(this.windowGame, 900, 20),
+      new Enemy(this.windowGame, 900, 109),
+      new Enemy(this.windowGame, 1200, 19),
+      new Enemy(this.windowGame, 1500, 109),
+      new Enemy(this.windowGame, 1800, 19),
+      new Enemy(this.windowGame, 2100, 109),
+      new Enemy(this.windowGame, 2400, 19),
+      new Enemy(this.windowGame, 2700, 260),
+      new Enemy(this.windowGame, 3000, 260),
+      new Enemy(this.windowGame, 3300, 109),
+      new Enemy(this.windowGame, 3300, 19)
     ];
     //this.sprite = new Sprite(this.windowGame);
     this.tickShootEnemy = 0;
-    this.tickShootEnemyFrequency = 60;
+    this.tickShootEnemyFrequency = 30;
     this.audio = document.querySelector("#music");
   }
   start() {
     this.audio.play();
+    this.player.start();
     this.intervalId = setInterval(() => {
       
       this.tickShootEnemy++;
       if (this.tickShootEnemy % this.tickShootEnemyFrequency === 0) {
         this.enemies.forEach((enemy) => {
-          enemy.shoot(this.player.x, this.player.y);
+          if (enemy.x < this.windowGame.offsetWidth) {
+            enemy.shoot(this.player.x, this.player.y);
+          }
+          
         });
       }
       this.update();
@@ -83,9 +95,11 @@ class Game {
   win(){
     const winContainer = document.createElement("div");
     winContainer.classList.add("win");
+    const wintText = document.createElement("h1");
+    wintText.textContent = "MISION COMPLETE";
+    winContainer.appendChild(wintText);
     this.windowGame.appendChild(winContainer);
   }
-
   checkColitions() {
     this.platforms.forEach((platform) => {
       const didCollide = platform.didCollide(this.player);
@@ -145,7 +159,11 @@ class Game {
           });
           enemy.element.style.display = "none";
           if (this.enemies.length === 0) {
-            
+            window.clearInterval(this.intervalId);
+            this.audio.pause();
+            setTimeout(() => {
+              this.win();
+            }, 100);
           }
           this.player.bullets = this.player.bullets.filter((bulletsFromArr) => {
             return bullet !== bulletsFromArr;
@@ -156,7 +174,7 @@ class Game {
     });
 
     //balas de enemy colisionan con player
-    const bulletEnemyInPlayer = this.enemies.find((enemy) => {
+    this.enemies.find((enemy) => {
       return enemy.bullets.find((bullet) => {
         if (this.player.didCollide(bullet)) {
           const newBullets = enemy.bullets.filter(
@@ -171,7 +189,10 @@ class Game {
             this.update();
             window.clearInterval(this.intervalId);
             this.audio.pause();
-            this.continue();
+            this.player.stop();
+            setTimeout(() => {
+              this.continue();
+            }, 100);
           }
         }
       });
